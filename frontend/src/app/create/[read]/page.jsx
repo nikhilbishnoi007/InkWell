@@ -2,6 +2,8 @@
 import React from 'react'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { FaLongArrowAltLeft } from "react-icons/fa";
 const Page = () => {
     const params = useParams()
     const { read } = params
@@ -22,6 +24,10 @@ const Page = () => {
 
     return (
         <>  
+        <div className="flex items-center cursor-pointer text-blue-600">
+        <FaLongArrowAltLeft />
+        <Link href="/create" >Go Back</Link>
+        </div>
         <div className="main m-5">
            <div className=' max-w-3xl mx-auto p-10  bg-zinc-800 flex flex-col gap-5 rounded-md'>
            <h1 className='text-center'>Title:{notes.title}</h1>

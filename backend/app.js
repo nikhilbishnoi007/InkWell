@@ -53,6 +53,15 @@ app.get("/getnotes/:id", async (req, res) => {
         data: note
     });
 })
+app.delete("/delete/:id", async (req,res)=>{
+    const deletenote=await postModel.findByIdAndDelete(req.params.id)
+    if(!deletenote){
+        return res.status(404).json({success:false, message:"Note not found"})
+    }
+    res.status(200).json({
+        success:true,
+    })
+})
 app.listen(port, () => {
     [
         console.log(`server is listening at port:${port}`)
