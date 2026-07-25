@@ -1,7 +1,40 @@
+"use client"
+
 import React from 'react'
 import Image from 'next/image'
+import { useState,useEffect } from 'react'
 
-const page = () => {
+const Page = () => {
+    const [form, setform] = useState({
+        username:"",
+        email:"",
+        password:""
+    })
+    const handleChange=(e)=>{
+        setform({...form,[e.target.name]:e.target.value})
+    }
+    const handleSubmit=async(e)=>{
+        e.preventDefault()
+        try {
+            const res=await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`,{
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+            })
+            const data=await res.json()
+            if(data.success){
+                alert("signin scuesfully")   
+                 setform({
+                    username:"",
+                    email:"",
+                    password:""
+                })
+            }
+        } catch (error) {
+            console.log(error.message)
+        }
+       
+    }
     return (
         <div className='flex flex-col  md:flex-row '>
             <div className="flex flex-col m-5  ">
@@ -18,20 +51,20 @@ const page = () => {
                <h1 className='text-center text-2xl font-bold'>Sign In</h1>
                <p className='text-zinc-500 text-center'>Welcome! please enter your detail to create your account</p>
                <div className="form m-5">
-                <form className='flex flex-col gap-4 '>
+                <form className='flex flex-col gap-4 ' onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-2">
 
-                    <label htmlFor="fullname">Name*</label>
-                    <input type="text" name='fullname' id='fullname'required placeholder='Enter Your Full Name' className='outline-none  p-2 bg-zinc-300 rounded-md' />
+                    <label htmlFor="username">UserName*</label>
+                    <input type="text" name='username' id='username' value={form.username} required placeholder='Create Your  Username' className='outline-none  p-2 bg-zinc-300 rounded-md' onChange={handleChange}/>
                     </div>
                     <div className="flex flex-col gap-2">
 
-                    <label htmlFor="username">Email*</label>
-                    <input type="text" name='username' id='username'required placeholder='Enter Your Email' className='outline-none  p-2 bg-zinc-300 rounded-md' />
+                    <label htmlFor="email">Email*</label>
+                    <input type="email" name='email' id='email'value={form.email}required placeholder='Enter Your Email' className='outline-none  p-2 bg-zinc-300 rounded-md' onChange={handleChange}/>
                     </div>
                     <div className="flex flex-col gap-2">
                     <label htmlFor="password">Password*</label>
-                    <input type="password" name='password' id='password' required placeholder='Enter Your Password' className='outline-none  p-2 bg-zinc-300 rounded-md' />
+                    <input type="password" name='password' id='password' value={form.password} required placeholder='Enter Your Password' className='outline-none  p-2 bg-zinc-300 rounded-md' onChange={handleChange}/>
                     </div>
                     <input type="submit" value="Create Account" className='text-white bg-linear-to-r from-purple-600 to-purple-800  p-2  rounded-md   hover:bg-blue-800 active:scale-90 transition-transform duration-150'/>
                 </form>
@@ -42,4 +75,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page
