@@ -13,9 +13,12 @@ const app = express()
 const port = process.env.PORT
 
 app.use(express.json())
-app.use(cookieParser())
 app.use(urlencoded({ extended: true }))
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+}))
+app.use(cookieParser())
 
 app.get("/", (req, res) => {
     res.send("Server Is Running")
@@ -24,23 +27,57 @@ app.get("/", (req, res) => {
 app.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        const salt = bcrypt.genSaltSync(10);
-         const hash = bcrypt.hashSync(password, salt);
-                const newuser = await user.create({
-                    username,
-                    email,
-                    password: hash
-                })
-                res.status(201).json({
-                    success: true,
-                    data: newuser,
-                });
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+        const newuser = await user.create({
+            username,
+            email,
+            password: hash
+        })
+        let token = jwt.sign({ email }, process.env.SECRET_KEY)
+        res.cookie("token", token)
+        res.status(201).json({
+            success: true,
+            data: newuser,
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: error.message })
+    }
+})
+app.post("/login", async (req, res) => {
+    const { email, password } = req.body
+    const finduser = await user.findOne({ email: email })
+    if (!finduser) return res.status(404).json({ success: false, message: error.message })
+    bcrypt.compare(password, finduser.password, (err, result) => {
+        if (result) {
+            let token = jwt.sign({ email:finduser.email }, process.env.SECRET_KEY)
+            res.cookie("token", token)
+            res.status(201).json({ success: true ,data:finduser})
+        }
+        else {
+            res.status(404).json({ success: false, message: error.message })
+        }
+    })
+})
+app.post("/logout",(req,res)=>{
+    res.cookie("token")
+    res.status(200).json({success:true,message:"logout"})
+})
+app.get("/checkauth", (req, res) => {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({ success: false, message: "Not logged in" });
     }
 
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        res.status(200).json({ success: true, user: decoded });
+    } catch (error) {
+        res.status(401).json({ success: false, message: "Invalid token" });
+    }
+});
 
-})
 app.post("/save", async (req, res) => {
     const { title, content } = req.body
     try {

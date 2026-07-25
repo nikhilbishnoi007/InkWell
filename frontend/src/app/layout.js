@@ -3,6 +3,7 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "./context/AuthContext";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -26,12 +27,13 @@ export default function RootLayout({ children }) {
       className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col flex-1">
+        <AuthProvider>
       <Navbar/>
       <div className=" flex-1">
         {children}
       </div>
-        
         <Footer/>
+        </AuthProvider>
       </body>
     </html>
   );

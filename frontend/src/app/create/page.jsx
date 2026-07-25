@@ -3,11 +3,21 @@ import React from 'react'
 import Link from 'next/link'
 import { MdDelete } from "react-icons/md";
 import { CiEdit } from "react-icons/ci";
-
 import { useState, useEffect } from 'react'
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 
 const Page = () => {
+    const {isloggedin}=useAuth()
+    const router=useRouter()
+    useEffect(() => {
+     if(!isloggedin){
+        router.push("/login")
+     }
+    }, [isloggedin,router])
+    
+
     const [form, setform] = useState({
         title: "",
         content: "",
@@ -83,7 +93,7 @@ const Page = () => {
         })
         seteditid(note._id)
     }
-
+  if (!isloggedin) return null
     return (
         <>
             <div className='main text-black w-full p-5 flex flex-col gap-3'>

@@ -3,19 +3,40 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState,useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/app/context/AuthContext';
+import { FaEye ,FaEyeSlash } from "react-icons/fa";
+
 
 
 const Page = () => {
+    const router=useRouter()
+    const { setisloggedin } = useAuth() 
     const [form, setform] = useState({
         email:"",
         password:""
     })
+    const [show, setshow] = useState(false)
     const handleChange=(e)=>{
         setform({...form,[e.target.name]:e.target.value})
     }
-    const handleSubmit=(e)=>{
+    const handleSubmit=async(e)=>{
         e.preventDefault()
-        console.log(form)
+        const res=await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`,{
+            method:"POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify(form),
+            credentials: "include",
+        })
+        const data=await res.json()
+        if(data.success){
+            alert("login succesffull")
+            setisloggedin(true)
+            router.push("/")
+        }
+    }
+    const handleShow=()=>{
+         setshow(!show)
     }
     return (
         <div className='flex flex-col  md:flex-row '>
@@ -41,7 +62,10 @@ const Page = () => {
                     </div>
                     <div className="flex flex-col gap-2">
                     <label htmlFor="password">Password*</label>
-                    <input type="password" name='password' id='password'value={form.password} required placeholder='Enter Your Password' className='outline-none  p-2 bg-zinc-300 rounded-md' onChange={handleChange}/>
+                    <div className="relative w-full">
+                    <input type={show? "password":"text"} name='password' id='password'value={form.password} required placeholder='Enter Your Password' className='outline-none w-full p-2 bg-zinc-300 rounded-md' onChange={handleChange}/>
+                    <button onClick={handleShow} type='button' className='absolute right-2 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-800 transition-colors'>{show?<FaEyeSlash />:<FaEye />}</button>
+                    </div>
                     </div>
                     <input type="submit" value="Login"  className='text-white bg-linear-to-r from-purple-600 to-purple-800  p-2 rounded-md   hover:bg-blue-800 active:scale-90 transition-transform duration-150'/>
                 </form>
