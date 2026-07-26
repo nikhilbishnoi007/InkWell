@@ -66,7 +66,8 @@ const Page = () => {
     }, [])
 
     const handleDelete = async (id) => {
-
+        const result=confirm("do yo want to delelte the diary!")
+        if(result){
         try {
             const deleteNotes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete/${id}`, {
                 method: "DELETE"
@@ -78,6 +79,10 @@ const Page = () => {
         } catch (error) {
             console.log(error.message)
         }
+    }
+    else{
+        return null
+    }
 
 
     }
