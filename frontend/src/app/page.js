@@ -10,6 +10,7 @@ import { useAuth } from '@/app/context/AuthContext';
 export default function Home() {
   const router = useRouter()
   const { isloggedin, setisloggedin } = useAuth()
+  const{user}=useAuth()
   const handlelogout = async () => {
     try {
       const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
@@ -32,8 +33,8 @@ export default function Home() {
         <div className="flex flex-col gap-5 m-10">
           <h2 className=" px-2 bg-linear-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Your Thoughts, Your Space</h2>
           <div>
-            <h2 className="text-2xl md:text-3xl">Welcome To </h2>
-            <h2 className="text-2xl md:text-3xl">Your <span className="bg-linear-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> Personal Diary</span></h2>
+            <h2 className="text-2xl md:text-3xl">Welcome {isloggedin ?user.username:"To"} , </h2>
+            <h2 className="text-2xl md:text-3xl"> <span className="bg-linear-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">  Your Personal Diary</span></h2>
             <p className="text-purple-300 mt-5 text-md max-w-md">Write Your thoughts, store your memories,and keep your journey safe: all in one private space</p>
           </div>
         </div>

@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
 import postModel from './models/post.js'
-import user from './models/user.js'
+import userModel from './models/user.js'
 
 dotenv.config()
 
@@ -25,17 +25,24 @@ app.get("/", (req, res) => {
 })
 
 app.post("/register", async (req, res) => {
+    const { username, email, password } = req.body;
+    const finduser = await userModel.findOne({ email: email })
+    if (finduser) return res.status(404).json({ success: false, message: "user already exist" })
     try {
-        const { username, email, password } = req.body;
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
-        const newuser = await user.create({
+        const newuser = await userModel.create({
             username,
             email,
             password: hash
         })
-        let token = jwt.sign({ email }, process.env.SECRET_KEY)
-        res.cookie("token", token)
+        let token = jwt.sign({ email: email, userid: newuser._id }, process.env.SECRET_KEY, { expiresIn: "7d" })
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
         res.status(201).json({
             success: true,
             data: newuser,
@@ -46,22 +53,27 @@ app.post("/register", async (req, res) => {
 })
 app.post("/login", async (req, res) => {
     const { email, password } = req.body
-    const finduser = await user.findOne({ email: email })
-    if (!finduser) return res.status(404).json({ success: false, message: error.message })
+    const finduser = await userModel.findOne({ email: email })
+    if (!finduser) return res.status(404).json({ success: false, message: "user not found" })
     bcrypt.compare(password, finduser.password, (err, result) => {
         if (result) {
-            let token = jwt.sign({ email:finduser.email }, process.env.SECRET_KEY)
-            res.cookie("token", token)
-            res.status(201).json({ success: true ,data:finduser})
+            let token = jwt.sign({ email: finduser.email, userid: finduser._id }, process.env.SECRET_KEY, { expiresIn: "7d" })
+            res.cookie("token", token, {
+                httpOnly: true,
+                sameSite: "lax",
+                secure: false,
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+            res.status(201).json({ success: true, data: finduser })
         }
         else {
             res.status(404).json({ success: false, message: error.message })
         }
     })
 })
-app.post("/logout",(req,res)=>{
+app.post("/logout", (req, res) => {
     res.cookie("token")
-    res.status(200).json({success:true,message:"logout"})
+    res.status(200).json({ success: true, message: "logout" })
 })
 app.get("/checkauth", (req, res) => {
     const token = req.cookies.token;
@@ -79,30 +91,66 @@ app.get("/checkauth", (req, res) => {
 });
 
 app.post("/save", async (req, res) => {
-    const { title, content } = req.body
     try {
+        const token = req.cookies.token;
+
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Not logged in" });
+        }
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        const { title, content,date } = req.body
+      
         let newpost = await postModel.create({
+            user: decoded.userid,
             title,
             content,
+            date
         })
+        const user = await userModel.findById(decoded.userid)
+        user.post.push(newpost._id)
+        await user.save()
         res.status(201).json({
             success: true,
             data: newpost,
         });
+
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+        console.log(error.message)
+    }
+
+})
+app.get("/getuser", async (req, res) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Not logged in" });
+        }
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        const user = await userModel.findById(decoded.userid)
+        res.status(200).json({
+            success: true,
+            data: user,
+        })
+    } catch (error) {
+        res.status(500).json({ success: false, message: "somthing went wrongs" });
     }
 
 })
 app.get("/getnotes", async (req, res) => {
     try {
-        const allNotes = await postModel.find()
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Not logged in" });
+        }
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        const allNotes = await postModel.find({ user: decoded.userid })
         res.status(200).json({
             success: true,
             data: allNotes,
         })
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: "somthing went wrongs" });
     }
 
 })
