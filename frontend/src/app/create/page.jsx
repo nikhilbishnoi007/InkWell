@@ -6,17 +6,19 @@ import { CiEdit } from "react-icons/ci";
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useUI } from '../context/UIContext'
 
 
 const Page = () => {
-    const { isloggedin } = useAuth()
+    const { isloggedin ,loading } = useAuth()
+     const { showToast ,showConfirm} = useUI();
     const { user } = useAuth()
     const router = useRouter()
     useEffect(() => {
-        if (!isloggedin) {
+        if (!loading && !isloggedin) {
             router.push("/login")
         }
-    }, [isloggedin, router])
+    }, [isloggedin, loading, router])
 
 
     const [form, setform] = useState({
@@ -42,10 +44,10 @@ const Page = () => {
             })
             const data = await res.json();
             if (data.success) {
-                alert("data save ")
+                showToast("dairy created")
                 setnotes((prevNotes) => [...prevNotes, data.data]);
             } else {
-                alert("Somthing went wrong")
+                showToast("Somthing went wrong")
             }
         } catch (error) {
             console.log(error.message)
@@ -76,7 +78,7 @@ const Page = () => {
 
 
     const handleDelete = async (id) => {
-        const result = confirm("do yo want to delelte the diary!")
+        const result = await showConfirm("do yo want to delelte the diary!")
         if (result) {
             try {
                 const deleteNotes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete/${id}`, {
@@ -91,7 +93,7 @@ const Page = () => {
             }
         }
         else {
-            return null
+            return 
         }
 
 
@@ -100,7 +102,7 @@ const Page = () => {
         setform({
             title: note.title,
             content: note.content,
-            date:note.date||""
+            date: note.date ? note.date.split("T")[0] : ""
         })
         setnotes((prevNotes) => prevNotes.filter((n) => n._id !== note._id));
 
@@ -109,7 +111,9 @@ const Page = () => {
         })
         seteditid(note._id)
     }
-    if (!isloggedin) return null
+    
+    if (loading) return <p className="text-center mt-10">Loading...</p>;
+    if (!isloggedin) return null;
     return (
         <>
             <div className='main text-black w-full p-5 flex flex-col gap-3'>
@@ -128,14 +132,14 @@ const Page = () => {
                         (
                             <>
                                 <h1 className=' m-4'>Your Diary</h1>
-                                <div className='p-2 grid  grid-cols-2 md:grid-cols-3 gap-4'>
+                                <div className='p-2 grid  grid-cols-1 md:grid-cols-3 gap-4'>
                                     {
                                         notes.map((note) => {
                                             return <div key={note._id} className='flex flex-col gap-4 bg-zinc-300 text-black  mb-2 mt-2  px-2 py-3  rounded-md max-w-2xl'>
-                                                <div className='flex justify-between gap-5'>
+                                                <div className='flex justify-between gap-2 md:gap-5'>
                                                     {/* <h2>Diary</h2> */}
                                                 <h2 className='text-center'>Title:{note.title}</h2>
-                                                 <p className='text-zinc-700'>{new Date(note.date).toLocaleDateString('en-US', {
+                                                 <p className='text-zinc-700 text-xs '>{new Date(note.date).toLocaleDateString('en-US', {
                                                         day: 'numeric',
                                                         month: 'short',
                                                         year: 'numeric',

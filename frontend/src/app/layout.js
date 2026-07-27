@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "./context/AuthContext";
+import { UIProvider } from "./context/UIContext";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -28,11 +29,13 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col flex-1">
         <AuthProvider>
+          <UIProvider>
       <Navbar/>
       <div className=" flex-1">
         {children}
       </div>
         <Footer/>
+        </UIProvider>
         </AuthProvider>
       </body>
     </html>

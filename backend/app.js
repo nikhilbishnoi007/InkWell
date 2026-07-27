@@ -48,6 +48,13 @@ app.post("/register", async (req, res) => {
             data: newuser,
         });
     } catch (error) {
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            return res.status(409).json({
+                success: false,
+                message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`,
+            });
+        }
         res.status(500).json({ success: false, message: error.message })
     }
 })
@@ -67,7 +74,7 @@ app.post("/login", async (req, res) => {
             res.status(201).json({ success: true, data: finduser })
         }
         else {
-            res.status(404).json({ success: false, message: error.message })
+            res.status(404).json({ success: false, message: "email or password is wrong" })
         }
     })
 })
@@ -76,6 +83,7 @@ app.post("/logout", (req, res) => {
     res.status(200).json({ success: true, message: "logout" })
 })
 app.get("/checkauth", (req, res) => {
+    res.set("Cache-Control", "no-store");
     const token = req.cookies.token;
 
     if (!token) {
@@ -98,8 +106,8 @@ app.post("/save", async (req, res) => {
             return res.status(401).json({ success: false, message: "Not logged in" });
         }
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        const { title, content,date } = req.body
-      
+        const { title, content, date } = req.body
+
         let newpost = await postModel.create({
             user: decoded.userid,
             title,
@@ -166,7 +174,7 @@ app.get("/getnotes/:id", async (req, res) => {
 })
 app.delete("/delete/:id", async (req, res) => {
     const deletenote = await postModel.findByIdAndDelete(req.params.id)
-    if (!deletenote) {
+    if (!deletenote ) {
         return res.status(404).json({ success: false, message: "Note not found", data: deletenote })
     }
     res.status(200).json({

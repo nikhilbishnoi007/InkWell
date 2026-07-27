@@ -8,12 +8,17 @@ const Page = () => {
     const params = useParams()
     const { read } = params
     const [notes, setnotes] = useState([])
+    const [notFoundflag, setNotFoundflag] = useState(false);
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/getnotes/${read}`)
                 const data = await res.json()
-                setnotes(data.data)
+                if (data.success) {
+                    setnotes(data.data)
+                } else {
+                    setNotFoundflag(true)
+                }
             } catch (error) {
                 console.log(error.message)
             }
@@ -21,8 +26,10 @@ const Page = () => {
         fetchData()
 
     }, [read])
-
+   
+    
     return (
+
         <>
             <div className="flex items-center cursor-pointer text-blue-600">
                 <FaLongArrowAltLeft />
@@ -31,17 +38,17 @@ const Page = () => {
             <div className="main m-5">
                 <div className=' max-w-3xl mx-auto p-10  bg-zinc-300 flex flex-col gap-5 rounded-md'>
                     <div className='flex justify-between'>
-                    <h1 className=''>Title:{notes.title}</h1>
-                    <p className='text-zinc-700'>Date:{new Date(notes.date).toLocaleDateString('en-US', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                    })}</p></div>
+                        <h1 className=''>Title:{notes.title}</h1>
+                        <p className='text-zinc-700'>Date:{new Date(notes.date).toLocaleDateString('en-US', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                        })}</p></div>
                     <p>{notes.content}</p>
                 </div>
             </div>
         </>
     )
-}
 
+}
 export default Page

@@ -3,10 +3,14 @@
 import React from 'react'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useAuth } from '../context/AuthContext'
+import { useUI } from '../context/UIContext'
 
 const Page = () => {
+    const { isloggedin} = useAuth()
+    const { showToast } = useUI();
     const router = useRouter()
     const [form, setform] = useState({
         username: "",
@@ -14,6 +18,8 @@ const Page = () => {
         password: ""
     })
     const [show, setshow] = useState(false)
+     if(isloggedin){
+     notFound()}
     const handleChange = (e) => {
         setform({ ...form, [e.target.name]: e.target.value })
     }
@@ -28,13 +34,15 @@ const Page = () => {
             })
             const data = await res.json()
             if (data.success) {
-                alert("signin scuesfully")
+                showToast("signin scuesfully")
                 router.push("/login")
                 setform({
                     username: "",
                     email: "",
                     password: ""
                 })
+            }else{
+                showToast(data.message)
             }
 
         } catch (error) {
