@@ -53,7 +53,7 @@ const Navbar = () => {
       </div>
         </Link>
 
-      <ul className='flex gap-2  items-center '>
+      <ul className='flex gap-4  items-center '>
         
 
         {isloggedin ? (
