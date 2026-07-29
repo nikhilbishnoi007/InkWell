@@ -14,7 +14,7 @@ const Navbar = () => {
   const { isloggedin, setisloggedin } = useAuth()
   const { showToast ,showConfirm} = useUI();
   const handlelogout = async () => {
-    const result = showConfirm("do yo want to logout")
+    const result = await showConfirm("do yo want to logout")
     if (!result) return; 
     try {
       const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
