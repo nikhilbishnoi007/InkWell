@@ -11,6 +11,7 @@ dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 5000
+const isProduction = process.env.NODE_ENV === "production";
 
 app.use(express.json())
 app.use(urlencoded({ extended: true }))
@@ -39,8 +40,8 @@ app.post("/register", async (req, res) => {
         let token = jwt.sign({ email: email, userid: newuser._id }, process.env.SECRET_KEY, { expiresIn: "7d" })
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false,
+            sameSite: isProduction ? "none" : "lax",
+            secure: isProduction,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.status(201).json({
@@ -67,8 +68,8 @@ app.post("/login", async (req, res) => {
             let token = jwt.sign({ email: finduser.email, userid: finduser._id }, process.env.SECRET_KEY, { expiresIn: "7d" })
             res.cookie("token", token, {
                 httpOnly: true,
-                sameSite: "lax",
-                secure: false,
+                sameSite: isProduction ? "none" : "lax",
+                secure: isProduction,
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
             res.status(201).json({ success: true, data: finduser })
