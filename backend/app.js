@@ -10,7 +10,7 @@ import userModel from './models/user.js'
 dotenv.config()
 
 const app = express()
-const port = process.env.PORT
+const port = process.env.PORT || 5000
 
 app.use(express.json())
 app.use(urlencoded({ extended: true }))
