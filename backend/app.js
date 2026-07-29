@@ -16,7 +16,7 @@ const isProduction = process.env.NODE_ENV === "production";
 app.use(express.json())
 app.use(urlencoded({ extended: true }))
 app.use(cors({
-    origin:process.env.FRONTEND_ROUTE ,
+    origin:process.env.FRONTEND_ROUTE,
     credentials: true,
 }))
 app.use(cookieParser())
