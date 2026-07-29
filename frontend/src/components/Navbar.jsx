@@ -7,12 +7,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import { usePathname } from 'next/navigation';
+import { useUI } from '@/app/context/UIContext';
 const Navbar = () => {
   const router = useRouter()
   const path=usePathname()
   const { isloggedin, setisloggedin } = useAuth()
+  const { showToast ,showConfirm} = useUI();
   const handlelogout = async () => {
-    const result = confirm("Do you want to logout?");  
+    const result = showConfirm("do yo want to logout")
     if (!result) return; 
     try {
       const req = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
@@ -22,18 +24,19 @@ const Navbar = () => {
       const reqdata = await req.json()
       if (reqdata.success) {
         
-        
+          
           setisloggedin(false)
           router.push("/")
       }
     } catch (error) {
-      alert(error.message)
+      showToast(error.message)
+     
     }
   }
   const handleClick = (e) => {
     if (!isloggedin) {
       e.preventDefault();
-      alert("Please login to create a note");
+      showToast("Please login to create a note");
       router.push("/login");
     }
     else {
@@ -41,7 +44,7 @@ const Navbar = () => {
     }
   }
   return (
-    <div className='w-full flex justify-between border-b border-zinc-400 p-4'>
+    <div className='w-full flex justify-between items-center border-b border-zinc-400 p-2 md:p-4  '>
        <Link href="/">
        
       <div className='flex items-center gap-2 cursor-pointer'>
@@ -50,7 +53,7 @@ const Navbar = () => {
       </div>
         </Link>
 
-      <ul className='flex gap-4 items-center'>
+      <ul className='flex gap-2  items-center '>
         
 
         {isloggedin ? (
@@ -62,7 +65,7 @@ const Navbar = () => {
         ) : (
           <>
 
-            <li><Link href='/login' className="text-white bg-linear-to-l from-purple-600 to-purple-800  p-2 rounded-md flex items-center gap-2 justify-center hover:active:scale-90 transition-transform duration-150 ">Login<MdOutlineLogin /></Link></li>
+            <li><Link href='/login' className="text-white bg-linear-to-l from-purple-600 to-purple-800  p-2 rounded-md flex items-center gap-2 justify-center hover:active:scale-90 transition-transform duration-150 ">Login <MdOutlineLogin /></Link></li>
             
           </>
 

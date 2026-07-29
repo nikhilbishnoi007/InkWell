@@ -3,12 +3,22 @@ import React from 'react'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@/app/context/AuthContext'
 import { FaLongArrowAltLeft } from "react-icons/fa";
+import { useRouter } from 'next/navigation'
+
 const Page = () => {
     const params = useParams()
     const { read } = params
+    const { isloggedin, loading } = useAuth()
+    const router=useRouter()
     const [notes, setnotes] = useState([])
-    const [notFoundflag, setNotFoundflag] = useState(false);
+    
+     useEffect(() => {
+            if (!loading && !isloggedin) {
+                router.push("/login")
+            }
+        }, [isloggedin, loading, router])
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -16,8 +26,6 @@ const Page = () => {
                 const data = await res.json()
                 if (data.success) {
                     setnotes(data.data)
-                } else {
-                    setNotFoundflag(true)
                 }
             } catch (error) {
                 console.log(error.message)
@@ -26,8 +34,8 @@ const Page = () => {
         fetchData()
 
     }, [read])
-   
-    
+
+
     return (
 
         <>

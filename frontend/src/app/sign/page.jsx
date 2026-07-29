@@ -46,7 +46,7 @@ const Page = () => {
             }
 
         } catch (error) {
-            alert("somthing went wrong", error.message)
+            showToast("somthing went wrong", error.message)
 
         }
         

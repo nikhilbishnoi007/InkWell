@@ -87,6 +87,7 @@ const Page = () => {
                 const data = await deleteNotes.json()
                 if (data.success) {
                     setnotes((prevNotes) => prevNotes.filter((note) => note._id !== id));
+                    showToast("dairy deleted") 
                 }
             } catch (error) {
                 console.log(error.message)
