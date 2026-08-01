@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useUI } from '../context/UIContext'
+import Image from 'next/image';
 
 
 const Page = () => {
@@ -118,8 +119,10 @@ const Page = () => {
     return (
         <>
             <div className='main text-black w-full p-5 flex flex-col gap-3'>
+                <div className='flex justify-between'>
+                    <h1 className=''>@{user.username}</h1>   
+                </div>
                 <div className="input">
-                    <h1 className='m-4'>@{user.username}</h1>
                     <h1>Create Diary</h1>
                     <form onSubmit={handleSubmit} className='flex flex-col gap-4 max-w-2xl '>
                         <input type="text" name="title" value={form.title} placeholder='Enter Diary Title' onChange={hadnleChange} className='px-2 py-5 bg-zinc-100 outline-none border border-none rounded-md' required />

@@ -7,11 +7,16 @@ import cookieParser from 'cookie-parser'
 import postModel from './models/post.js'
 import userModel from './models/user.js'
 
+
+
 dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 5000
 const isProduction = process.env.NODE_ENV === "production";
+
+
+
 
 app.use(express.json())
 app.use(urlencoded({ extended: true }))
@@ -79,6 +84,7 @@ app.post("/login", async (req, res) => {
         }
     })
 })
+
 app.post("/logout", (req, res) => {
     res.cookie("token")
     res.status(200).json({ success: true, message: "logout" })
